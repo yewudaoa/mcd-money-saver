@@ -1,6 +1,8 @@
 # 🍔 麦门省钱助手 (M Money-Saver Skill)
 
-> 麦当劳程序员创意开发大赛参赛作品
+![Contest](https://img.shields.io/badge/麦当劳程序员创意开发大赛-参赛作品-da291c) ![MCP](https://img.shields.io/badge/Powered_by-McDonald's_MCP-ffc72c) ![License](https://img.shields.io/badge/license-MIT-blue)
+
+> 🎮 **网页版交互 Demo**：打开 [demo/index.html](demo/index.html) 即可体验比价逻辑（选餐 → 选券 → 自动算出最省方案）
 > 基于 McDonald's MCP Server 开发的 WorkBuddy Skill：让每一顿麦当劳都花得明明白白、省得实实在在。
 
 ## 项目简介

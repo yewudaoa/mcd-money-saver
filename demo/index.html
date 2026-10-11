@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>麦门省钱助手 · 比价 Demo</title>
+<style>
+  :root { --mred:#da291c; --myellow:#ffc72c; --ink:#1a1a1a; }
+  * { box-sizing:border-box; margin:0; padding:0; font-family:"Microsoft YaHei",system-ui,sans-serif; }
+  body { background:#f7f3ee; color:var(--ink); min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:24px 16px; }
+  header { text-align:center; margin-bottom:20px; }
+  header h1 { font-size:26px; } header h1 span { color:var(--mred); }
+  header p { color:#777; font-size:13px; margin-top:6px; }
+  .wrap { width:100%; max-width:720px; display:grid; gap:16px; }
+  .card { background:#fff; border-radius:14px; padding:18px 20px; box-shadow:0 2px 10px rgba(0,0,0,.06); }
+  .card h2 { font-size:15px; margin-bottom:12px; border-left:4px solid var(--myellow); padding-left:8px; }
+  .menu { display:flex; flex-wrap:wrap; gap:8px; }
+  .item { border:1.5px solid #e5ddd0; border-radius:10px; padding:8px 12px; cursor:pointer; user-select:none; font-size:14px; transition:.15s; background:#fff; }
+  .item.sel { border-color:var(--mred); background:#fff5f4; }
+  .item b { display:block; font-size:13px; } .item small { color:#999; }
+  .coupons { display:flex; flex-direction:column; gap:8px; margin-top:4px; }
+  .coupon { display:flex; justify-content:space-between; align-items:center; border:1.5px dashed #d8cdb8; border-radius:10px; padding:10px 12px; cursor:pointer; font-size:14px; }
+  .coupon.sel { border-color:var(--mred); border-style:solid; background:#fff5f4; }
+  .coupon .amt { color:var(--mred); font-weight:700; }
+  .coupon .exp { color:#aaa; font-size:12px; }
+  .result { text-align:center; }
+  .price { font-size:40px; font-weight:800; color:var(--mred); }
+  .price small { font-size:16px; }
+  .save { display:inline-block; margin-top:6px; background:var(--myellow); border-radius:999px; padding:4px 14px; font-weight:700; font-size:14px; }
+  .rows { margin-top:14px; font-size:13px; color:#666; display:grid; gap:4px; text-align:left; }
+  .rows .row { display:flex; justify-content:space-between; border-bottom:1px dashed #eee; padding:4px 0; }
+  .best { color:var(--mred); font-weight:700; }
+  footer { margin-top:18px; color:#aaa; font-size:12px; text-align:center; line-height:1.7; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🍔 麦门<span>省钱助手</span> · 比价 Demo</h1>
+  <p>点麦当劳之前先问它一句，能省则省 —— 真实版本运行于 WorkBuddy + 麦当劳 MCP</p>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <h2>1️⃣ 选你想吃的</h2>
+    <div class="menu" id="menu"></div>
+  </div>
+
+  <div class="card">
+    <h2>2️⃣ 选择你的券（可多选对比）</h2>
+    <div class="coupons" id="coupons"></div>
+  </div>
+
+  <div class="card result">
+    <h2>3️⃣ 最省方案</h2>
+    <div class="price"><small>¥</small><span id="best">0.00</span></div>
+    <div class="save" id="saveTag">💰 省 ¥0.00</div>
+    <div class="rows" id="rows"></div>
+  </div>
+</div>
+
+<footer>
+  本页面为演示用途，价格与券为示例数据，非麦当劳官方产品。<br>
+  真实版本通过麦当劳 MCP Server 的 calculate-price 实时试算。
+</footer>
+
+<script>
+const MENU = [
+  { name:"巨无霸套餐",   price:46.5 },
+  { name:"麦辣鸡腿堡套餐", price:41.0 },
+  { name:"板烧鸡腿堡套餐", price:43.5 },
+  { name:"麦乐鸡(10块)",  price:19.5 },
+  { name:"中可乐",       price:9.5  },
+  { name:"圆筒冰淇淋",    price:5.0  },
+];
+const COUPONS = [
+  { name:"巨无霸买一送一",   type:"bogo",  apply:["巨无霸套餐"] },
+  { name:"套餐立减8元",     type:"cut",   cut:8,  min:35 },
+  { name:"会员日8折券",     type:"pct",   pct:0.8, min:30 },
+  { name:"小食第二份半价",   type:"half2", apply:["麦乐鸡(10块)"] },
+];
+const sel = new Set(), usedCoupons = new Set();
+
+const menuEl = document.getElementById('menu');
+MENU.forEach(m => {
+  const d = document.createElement('div');
+  d.className = 'item'; d.innerHTML = `<b>${m.name}</b><small>¥${m.price.toFixed(1)}</small>`;
+  d.onclick = () => { sel.has(m.name) ? sel.delete(m.name) : sel.add(m.name); d.classList.toggle('sel'); calc(); };
+  menuEl.appendChild(d);
+});
+const cpEl = document.getElementById('coupons');
+COUPONS.forEach(c => {
+  const d = document.createElement('div');
+  d.className = 'coupon';
+  d.innerHTML = `<span>${c.name}</span><span class="exp">${desc(c)}</span>`;
+  d.onclick = () => { usedCoupons.has(c) ? usedCoupons.delete(c) : usedCoupons.add(c); d.classList.toggle('sel'); calc(); };
+  cpEl.appendChild(d);
+});
+function desc(c){
+  if (c.type==='cut') return `满${c.min}减${c.cut}`;
+  if (c.type==='pct') return `满${c.min}打${c.pct*10}折`;
+  if (c.type==='bogo') return '指定套餐第二份免费';
+  return '指定小食第二份半价';
+}
+function calc(){
+  const items = MENU.filter(m => sel.has(m.name));
+  const base = items.reduce((s,m)=>s+m.price,0);
+  const plans = [{ name:'原价购买', total:base, coupon:null }];
+  if (base > 0) for (const c of usedCoupons){
+    let t = base, ok = false;
+    if (c.type==='cut' && base>=c.min){ t = base-c.cut; ok=true; }
+    if (c.type==='pct' && base>=c.min){ t = base*c.pct; ok=true; }
+    if (c.type==='bogo'){
+      const hit = items.filter(m=>c.apply.includes(m.name));
+      if (hit.length){ t = base - hit[0].price; ok=true; }
+    }
+    if (c.type==='half2'){
+      const hit = items.filter(m=>c.apply.includes(m.name));
+      if (hit.length){ t = base - hit[0].price/2; ok=true; }
+    }
+    if (ok) plans.push({ name:`用券：${c.name}`, total:t, coupon:c.name });
+  }
+  plans.sort((a,b)=>a.total-b.total);
+  const best = plans[0];
+  document.getElementById('best').textContent = best.total.toFixed(2);
+  const save = Math.max(0, base - best.total);
+  document.getElementById('saveTag').textContent = save>0 ? `💰 相比原价省 ¥${save.toFixed(2)}` : '🤔 原价即可，无需用券';
+  document.getElementById('rows').innerHTML = plans.map(p =>
+    `<div class="row ${p===best?'best':''}"><span>${p.name}${p===best?' ⭐最省':''}</span><span>¥${p.total.toFixed(2)}</span></div>`).join('');
+}
+calc();
+</script>
+</body>
+</html>
