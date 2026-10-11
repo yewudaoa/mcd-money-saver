@@ -77,23 +77,28 @@
     });
   }
 
-  /* ---------- 比价计算 ---------- */
+  /* ---------- 比价计算（含叠加规则） ---------- */
   function calc() {
     const store = S.load();
     const items = store.products.filter(p => sel.has(p.id)).map(p => ({ prod: p, qty: 1 }));
-    /* 基价：优惠价优先，再叠加打折活动折扣 */
-    let base = 0;
-    items.forEach(i => { base += S.unitPrice(store, i.prod) * S.activePromoRate(store, i.prod.id); });
+    /* 原价方案：享受全部活动（商品级不可叠加除外） */
+    const baseFull = S.basePrice(store, items, 'full');
 
-    const plans = [{ name: '原价购买', total: base, coupon: null }];
-    if (base > 0) {
+    const plans = [{ name: '原价购买', total: baseFull, coupon: null }];
+    if (baseFull > 0) {
       for (const cid of usedCoupons) {
         const c = store.coupons.find(x => x.id === cid);
         if (!c || !c.onSale) continue;
+        /* 不可叠加券：完全不吃活动；否则仅叠加"可叠加活动" */
+        const mode = c.stack === false ? 'none' : 'plain';
+        const base = S.basePrice(store, items, mode);
         const r = S.evalPlan(store, c, items, base);
-        if (r.ok) plans.push({ name: `用券：${c.name}`, total: r.total, coupon: c.name });
+        if (r.ok) {
+          plans.push({ name: `用券：${c.name}${c.stack === false ? '（不叠加）' : ''}`, total: r.total, coupon: c.name });
+        }
       }
     }
+    const base = baseFull;
     plans.sort((a, b) => a.total - b.total);
     const best = plans[0];
     $('best').textContent = best.total.toFixed(2);

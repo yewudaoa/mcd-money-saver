@@ -44,6 +44,7 @@
         : `<span class="thumb" style="background:linear-gradient(135deg,${p.grad[0]},${p.grad[1]})">${p.emoji}</span>`}</td>
         <td>${esc(p.name)}</td>
         <td>¥${Number(p.price).toFixed(2)}${p.promoPrice ? `<br><small style="color:var(--mred)">优惠价 ¥${Number(p.promoPrice).toFixed(2)}</small>` : ''}</td>
+        <td><span class="tag ${p.allowStack === false ? 'off' : 'type'}">${p.allowStack === false ? '不可叠加' : '可叠加'}</span></td>
         <td><span class="tag ${p.onSale ? 'on' : 'off'}">${p.onSale ? '上架中' : '已下架'}</span></td>
         <td>
           <button onclick="editProd('${p.id}')">编辑</button>
@@ -60,6 +61,7 @@
     $('pName').value = p.name; $('pEmoji').value = p.emoji;
     $('pPrice').value = p.price; $('pPromo').value = p.promoPrice || '';
     $('pGrad1').value = p.grad[0]; $('pGrad2').value = p.grad[1];
+    $('pStack').value = p.allowStack === false ? '0' : '1';
     $('pImg').value = '';
     if (pendingImg) { $('pImgPreview').src = pendingImg; $('pImgPreviewBox').style.display = ''; }
     else $('pImgPreviewBox').style.display = 'none';
@@ -75,6 +77,7 @@
       promoPrice: $('pPromo').value === '' ? null : Number($('pPromo').value),
       grad: [$('pGrad1').value || '#ffd86b', $('pGrad2').value || '#ff9d3c'],
       img: pendingImg,
+      allowStack: $('pStack').value === '1',
     };
     if (editingProd) { S.updateProduct(editingProd, data); editingProd = null; $('prodFormTitle').textContent = '新增商品'; }
     else S.addProduct(Object.assign({ onSale: true }, data));
@@ -104,6 +107,7 @@
         <td><span class="tag type">${TYPE_LABEL[c.type]}</span></td>
         <td>${couponDesc(c)}</td>
         <td>${esc(applyTargets(c))}</td>
+        <td><span class="tag ${c.stack === false ? 'off' : 'type'}">${c.stack === false ? '不可叠加' : '可叠加'}</span></td>
         <td><span class="tag ${c.onSale ? 'on' : 'off'}">${c.onSale ? '发放中' : '已停发'}</span></td>
         <td>
           <button onclick="editCp('${c.id}')">编辑</button>
@@ -124,6 +128,7 @@
     $('cName').value = c.name; $('cType').value = c.type;
     $('cValue').value = c.value != null ? c.value : '';
     $('cMin').value = c.min;
+    $('cStack').value = c.stack === false ? '0' : '1';
     renderCpProductChecks(c.applyIds);
     $('cpFormTitle').textContent = '编辑券：' + c.name;
     syncValueLabel();
@@ -144,6 +149,7 @@
       value: (t === 'bogo' || t === 'half2') ? null : ($('cValue').value === '' ? null : Number($('cValue').value)),
       min: Number($('cMin').value) || 0,
       applyIds: (t === 'bogo' || t === 'half2') ? [...$('cpApply').querySelectorAll('input:checked')].map(i => i.value) : [],
+      stack: $('cStack').value === '1',
     };
     if (editingCoupon) { S.updateCoupon(editingCoupon, data); editingCoupon = null; $('cpFormTitle').textContent = '新增券 / 红包'; }
     else S.addCoupon(Object.assign({ onSale: true }, data));
@@ -159,6 +165,7 @@
         <td>${esc(a.name)}</td>
         <td><b style="color:var(--mred)">${(Number(a.pct) * 10).toFixed(1)} 折</b></td>
         <td>${esc(names || '（未选商品）')}</td>
+        <td><span class="tag ${a.stack === false ? 'off' : 'type'}">${a.stack === false ? '不可叠加' : '可与券叠加'}</span></td>
         <td><span class="tag ${a.onSale ? 'on' : 'off'}">${a.onSale ? '进行中' : '已暂停'}</span></td>
         <td>
           <button onclick="editPm('${a.id}')">编辑</button>
@@ -178,6 +185,7 @@
     const a = S.load().promos.find(x => x.id === id);
     editingPromo = id;
     $('aName').value = a.name; $('aPct').value = a.pct;
+    $('aStack').value = a.stack === false ? '0' : '1';
     renderPmProductChecks(a.productIds);
     $('pmFormTitle').textContent = '编辑活动：' + a.name;
   };
@@ -187,6 +195,7 @@
       name: $('aName').value.trim() || '未命名活动',
       pct: Number($('aPct').value) || 1,
       productIds: [...$('pmApply').querySelectorAll('input:checked')].map(i => i.value),
+      stack: $('aStack').value === '1',
     };
     if (editingPromo) { S.updatePromo(editingPromo, data); editingPromo = null; $('pmFormTitle').textContent = '新增打折活动'; }
     else S.addPromo(Object.assign({ onSale: true }, data));

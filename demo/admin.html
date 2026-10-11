@@ -60,12 +60,13 @@
       <div id="pImgPreviewBox" style="display:none"><label>图片预览 <a href="javascript:void(0)" id="pImgClear" style="color:var(--mred)">移除图片</a></label><img id="pImgPreview" style="width:56px;height:56px;object-fit:cover;border-radius:10px;border:1px solid #eee"></div>
       <div><label>售价（元）</label><input id="pPrice" type="number" step="0.1" required placeholder="46.5"></div>
       <div><label>优惠价（可空）</label><input id="pPromo" type="number" step="0.1" placeholder="39.9"></div>
+      <div><label>优惠叠加</label><select id="pStack"><option value="1">可参与打折活动</option><option value="0">不可叠加（不参与活动）</option></select></div>
       <div><label>图片渐变色①</label><input id="pGrad1" type="color" value="#ffd86b"></div>
       <div><label>图片渐变色②</label><input id="pGrad2" type="color" value="#ff9d3c"></div>
       <div class="full"><button type="submit" style="background:var(--mred);color:#fff;border:none;padding:8px 22px;border-radius:8px">保存商品</button></div>
     </form>
     <table>
-      <thead><tr><th>图片</th><th>名称</th><th>价格</th><th>状态</th><th>操作</th></tr></thead>
+      <thead><tr><th>图片</th><th>名称</th><th>价格</th><th>叠加</th><th>状态</th><th>操作</th></tr></thead>
       <tbody id="prodBody"></tbody>
     </table>
   </div>
@@ -86,11 +87,12 @@
       </div>
       <div><label>金额 / 折扣</label><input id="cValue" placeholder="5"></div>
       <div><label>使用门槛（元，0 无门槛）</label><input id="cMin" type="number" value="0"></div>
+      <div><label>叠加规则</label><select id="cStack"><option value="1">可与活动/优惠叠加</option><option value="0">不可叠加（不与活动同享）</option></select></div>
       <div class="full" id="cpApplyBox"><label>适用商品（买一送一/第二份半价需指定）</label><div id="cpApply"></div></div>
       <div class="full"><button type="submit" style="background:var(--mred);color:#fff;border:none;padding:8px 22px;border-radius:8px">保存券</button></div>
     </form>
     <table>
-      <thead><tr><th>名称</th><th>类型</th><th>规则</th><th>适用</th><th>状态</th><th>操作</th></tr></thead>
+      <thead><tr><th>名称</th><th>类型</th><th>规则</th><th>适用</th><th>叠加</th><th>状态</th><th>操作</th></tr></thead>
       <tbody id="cpBody"></tbody>
     </table>
   </div>
@@ -101,12 +103,13 @@
     <form id="pmForm" class="grid">
       <div><label>活动名称</label><input id="aName" required placeholder="如：程序员节特惠"></div>
       <div><label>折扣（0.88 = 88折）</label><input id="aPct" type="number" step="0.01" min="0.1" max="1" required placeholder="0.88"></div>
+      <div><label>叠加规则</label><select id="aStack"><option value="1">可与券叠加</option><option value="0">不可叠加（不与券同享）</option></select></div>
       <div class="full"><label>参与商品</label><div id="pmApply"></div></div>
       <div class="full"><button type="submit" style="background:var(--mred);color:#fff;border:none;padding:8px 22px;border-radius:8px">保存活动</button></div>
     </form>
     <button class="reset danger" id="resetBtn">↩ 恢复默认数据</button>
     <table>
-      <thead><tr><th>活动</th><th>折扣</th><th>参与商品</th><th>状态</th><th>操作</th></tr></thead>
+      <thead><tr><th>活动</th><th>折扣</th><th>参与商品</th><th>叠加</th><th>状态</th><th>操作</th></tr></thead>
       <tbody id="pmBody"></tbody>
     </table>
   </div>
