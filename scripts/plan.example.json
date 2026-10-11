@@ -1,8 +1,0 @@
-{
-  "store": "示例-望京麦当劳",
-  "plans": [
-    { "name": "原价-到店自取", "totalPrice": 4650, "coupon": null },
-    { "name": "巨无霸买一送一", "totalPrice": 3450, "coupon": "BOGO-BIGMAC-10" },
-    { "name": "会员日8折券", "totalPrice": 3720, "coupon": "VIP-80PCT" }
-  ]
-}
