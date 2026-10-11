@@ -33,8 +33,28 @@
     return store;
   }
   function save(store) {
-    try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) { /* ignore */ }
+    try {
+      localStorage.setItem(KEY, JSON.stringify(store));
+      if (global.McdToast) McdToast('✅ 已保存');
+    } catch (e) {
+      if (global.McdToast) McdToast('⚠️ 保存失败：浏览器存储空间已满（通常是上传图片过多），请删除部分商品图片后重试');
+    }
   }
+
+  /* 轻量提示条（前台/后台共用） */
+  global.McdToast = function (msg) {
+    let el = document.getElementById('mcd_toast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'mcd_toast';
+      el.style.cssText = 'position:fixed;top:18px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.78);color:#fff;padding:8px 18px;border-radius:999px;font-size:13px;z-index:9999;transition:.3s;pointer-events:none;';
+      document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.style.opacity = '1';
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.style.opacity = '0'; }, 1600);
+  };
 
   /* 商品 */
   function addProduct(p) { const s = load(); p.id = 'p' + Date.now(); s.products.push(p); save(s); return p.id; }
@@ -101,10 +121,16 @@
     return { ok, total: Math.max(0, total), coupon: c.name };
   }
 
+  /* 叠加标签即时切换 */
+  function toggleProductStack(id) { const s = load(); const p = s.products.find(x => x.id === id); if (p) { p.allowStack = p.allowStack === false; save(s); } return p && p.allowStack; }
+  function toggleCouponStack(id) { const s = load(); const c = s.coupons.find(x => x.id === id); if (c) { c.stack = c.stack === false; save(s); } return c && c.stack; }
+  function togglePromoStack(id) { const s = load(); const a = s.promos.find(x => x.id === id); if (a) { a.stack = a.stack === false; save(s); } return a && a.stack; }
+
   global.McdStore = {
     load, save, addProduct, updateProduct, removeProduct, toggleProduct,
     addCoupon, updateCoupon, removeCoupon, toggleCoupon,
     addPromo, updatePromo, removePromo, togglePromo,
+    toggleProductStack, toggleCouponStack, togglePromoStack,
     unitPrice, basePrice, evalPlan,
   };
 })(window);

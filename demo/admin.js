@@ -18,7 +18,7 @@
       const img = new Image();
       img.onload = function () {
         const canvas = document.createElement('canvas');
-        const scale = Math.min(1, 240 / Math.max(img.width, img.height));
+        const scale = Math.min(1, 200 / Math.max(img.width, img.height));
         canvas.width = Math.round(img.width * scale);
         canvas.height = Math.round(img.height * scale);
         canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -44,7 +44,7 @@
         : `<span class="thumb" style="background:linear-gradient(135deg,${p.grad[0]},${p.grad[1]})">${p.emoji}</span>`}</td>
         <td>${esc(p.name)}</td>
         <td>¥${Number(p.price).toFixed(2)}${p.promoPrice ? `<br><small style="color:var(--mred)">优惠价 ¥${Number(p.promoPrice).toFixed(2)}</small>` : ''}</td>
-        <td><span class="tag ${p.allowStack === false ? 'off' : 'type'}">${p.allowStack === false ? '不可叠加' : '可叠加'}</span></td>
+        <td><span class="tag link ${p.allowStack === false ? 'off' : 'type'}" title="点击切换" onclick="toggleProdStack('${p.id}')">${p.allowStack === false ? '不可叠加' : '可叠加'}</span></td>
         <td><span class="tag ${p.onSale ? 'on' : 'off'}">${p.onSale ? '上架中' : '已下架'}</span></td>
         <td>
           <button onclick="editProd('${p.id}')">编辑</button>
@@ -107,7 +107,7 @@
         <td><span class="tag type">${TYPE_LABEL[c.type]}</span></td>
         <td>${couponDesc(c)}</td>
         <td>${esc(applyTargets(c))}</td>
-        <td><span class="tag ${c.stack === false ? 'off' : 'type'}">${c.stack === false ? '不可叠加' : '可叠加'}</span></td>
+        <td><span class="tag link ${c.stack === false ? 'off' : 'type'}" title="点击切换" onclick="toggleCpStack('${c.id}')">${c.stack === false ? '不可叠加' : '可叠加'}</span></td>
         <td><span class="tag ${c.onSale ? 'on' : 'off'}">${c.onSale ? '发放中' : '已停发'}</span></td>
         <td>
           <button onclick="editCp('${c.id}')">编辑</button>
@@ -165,7 +165,7 @@
         <td>${esc(a.name)}</td>
         <td><b style="color:var(--mred)">${(Number(a.pct) * 10).toFixed(1)} 折</b></td>
         <td>${esc(names || '（未选商品）')}</td>
-        <td><span class="tag ${a.stack === false ? 'off' : 'type'}">${a.stack === false ? '不可叠加' : '可与券叠加'}</span></td>
+        <td><span class="tag link ${a.stack === false ? 'off' : 'type'}" title="点击切换" onclick="togglePmStack('${a.id}')">${a.stack === false ? '不可叠加' : '可与券叠加'}</span></td>
         <td><span class="tag ${a.onSale ? 'on' : 'off'}">${a.onSale ? '进行中' : '已暂停'}</span></td>
         <td>
           <button onclick="editPm('${a.id}')">编辑</button>
@@ -215,6 +215,9 @@
   };
 
   window.S = S; window.renderProducts = renderProducts; window.renderCoupons = renderCoupons; window.renderPromos = renderPromos;
+  window.toggleProdStack = function (id) { S.toggleProductStack(id); renderProducts(); };
+  window.toggleCpStack = function (id) { S.toggleCouponStack(id); renderCoupons(); };
+  window.togglePmStack = function (id) { S.togglePromoStack(id); renderPromos(); };
   syncValueLabel();
   renderProducts(); renderCoupons(); renderPromos();
 })();
