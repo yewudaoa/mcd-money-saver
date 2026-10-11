@@ -3,6 +3,11 @@
 ![Contest](https://img.shields.io/badge/麦当劳程序员创意开发大赛-参赛作品-da291c) ![MCP](https://img.shields.io/badge/Powered_by-McDonald's_MCP-ffc72c) ![License](https://img.shields.io/badge/license-MIT-blue)
 
 > 🎮 **网页版交互 Demo**：打开 [demo/index.html](demo/index.html) 即可体验比价逻辑（选餐 → 选券 → 自动算出最省方案）
+>
+> 🛠️ **后台管理系统**：打开 [demo/admin.html](demo/admin.html) 可管理商品与优惠，前台实时生效（localStorage 共享）：
+> - 商品管理：**上架 / 下架**、商品**定价**、**优惠价**、商品图片（Emoji + 渐变色）
+> - 优惠券 / 红包：满减券、折扣券、**红包（立抵）**、买一送一、第二份半价，支持设置门槛与适用商品，可停发/发放
+> - 打折活动：限时折扣（如程序员节 88 折），按商品维度叠加生效，可暂停/启动
 > 基于 McDonald's MCP Server 开发的 WorkBuddy Skill：让每一顿麦当劳都花得明明白白、省得实实在在。
 
 ## 项目简介
