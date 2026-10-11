@@ -7,11 +7,41 @@
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 
   /* ---------- 商品 ---------- */
+  let pendingImg = null; // 待保存的 base64 图片
+
+  // 选择图片 → 压缩到 240px JPEG base64（控制 localStorage 体积）
+  $('pImg').onchange = function () {
+    const file = this.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function (ev) {
+      const img = new Image();
+      img.onload = function () {
+        const canvas = document.createElement('canvas');
+        const scale = Math.min(1, 240 / Math.max(img.width, img.height));
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        pendingImg = canvas.toDataURL('image/jpeg', 0.82);
+        $('pImgPreview').src = pendingImg;
+        $('pImgPreviewBox').style.display = '';
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+  $('pImgClear').onclick = function () {
+    pendingImg = null; $('pImg').value = '';
+    $('pImgPreviewBox').style.display = 'none';
+  };
+
   function renderProducts() {
     const s = S.load();
     $('prodBody').innerHTML = s.products.map(p => `
       <tr style="${p.onSale ? '' : 'opacity:.5'}">
-        <td><span class="thumb" style="background:linear-gradient(135deg,${p.grad[0]},${p.grad[1]})">${p.emoji}</span></td>
+        <td>${p.img
+        ? `<img src="${p.img}" style="width:40px;height:40px;object-fit:cover;border-radius:10px">`
+        : `<span class="thumb" style="background:linear-gradient(135deg,${p.grad[0]},${p.grad[1]})">${p.emoji}</span>`}</td>
         <td>${esc(p.name)}</td>
         <td>¥${Number(p.price).toFixed(2)}${p.promoPrice ? `<br><small style="color:var(--mred)">优惠价 ¥${Number(p.promoPrice).toFixed(2)}</small>` : ''}</td>
         <td><span class="tag ${p.onSale ? 'on' : 'off'}">${p.onSale ? '上架中' : '已下架'}</span></td>
@@ -26,9 +56,13 @@
   window.editProd = function (id) {
     const p = S.load().products.find(x => x.id === id);
     editingProd = id;
+    pendingImg = p.img || null;
     $('pName').value = p.name; $('pEmoji').value = p.emoji;
     $('pPrice').value = p.price; $('pPromo').value = p.promoPrice || '';
     $('pGrad1').value = p.grad[0]; $('pGrad2').value = p.grad[1];
+    $('pImg').value = '';
+    if (pendingImg) { $('pImgPreview').src = pendingImg; $('pImgPreviewBox').style.display = ''; }
+    else $('pImgPreviewBox').style.display = 'none';
     $('prodFormTitle').textContent = '编辑商品：' + p.name;
   };
 
@@ -40,9 +74,11 @@
       price: Number($('pPrice').value) || 0,
       promoPrice: $('pPromo').value === '' ? null : Number($('pPromo').value),
       grad: [$('pGrad1').value || '#ffd86b', $('pGrad2').value || '#ff9d3c'],
+      img: pendingImg,
     };
     if (editingProd) { S.updateProduct(editingProd, data); editingProd = null; $('prodFormTitle').textContent = '新增商品'; }
     else S.addProduct(Object.assign({ onSale: true }, data));
+    pendingImg = null; $('pImg').value = ''; $('pImgPreviewBox').style.display = 'none';
     e.target.reset(); renderProducts();
   };
 

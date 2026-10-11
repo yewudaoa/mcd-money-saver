@@ -56,6 +56,8 @@
     <form id="prodForm" class="grid">
       <div><label>商品名称</label><input id="pName" required placeholder="如：巨无霸套餐"></div>
       <div><label>图片 Emoji</label><input id="pEmoji" placeholder="🍔"></div>
+      <div><label>上传图片（可选，覆盖 Emoji）</label><input id="pImg" type="file" accept="image/*"></div>
+      <div id="pImgPreviewBox" style="display:none"><label>图片预览 <a href="javascript:void(0)" id="pImgClear" style="color:var(--mred)">移除图片</a></label><img id="pImgPreview" style="width:56px;height:56px;object-fit:cover;border-radius:10px;border:1px solid #eee"></div>
       <div><label>售价（元）</label><input id="pPrice" type="number" step="0.1" required placeholder="46.5"></div>
       <div><label>优惠价（可空）</label><input id="pPromo" type="number" step="0.1" placeholder="39.9"></div>
       <div><label>图片渐变色①</label><input id="pGrad1" type="color" value="#ffd86b"></div>

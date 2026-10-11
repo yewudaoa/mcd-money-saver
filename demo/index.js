@@ -42,10 +42,13 @@
     onSale.forEach(p => {
       const d = document.createElement('div');
       d.className = 'item';
+      const imgHtml = p.img
+        ? `<img class="pimg real" src="${p.img}" alt="${p.name}">`
+        : `<span class="pimg" style="background:linear-gradient(135deg,${p.grad[0]},${p.grad[1]})">${p.emoji}</span>`;
       const promoTag = p.promoPrice != null && p.promoPrice !== ''
         ? `<small>¥${Number(p.promoPrice).toFixed(1)} <s style="color:#bbb">¥${Number(p.price).toFixed(1)}</s></small>`
         : `<small>¥${Number(p.price).toFixed(1)}</small>`;
-      d.innerHTML = `<span class="pimg" style="background:linear-gradient(135deg,${p.grad[0]},${p.grad[1]})">${p.emoji}</span><b>${p.name}</b>${promoTag}`;
+      d.innerHTML = `${imgHtml}<b>${p.name}</b>${promoTag}`;
       d.onclick = () => { sel.has(p.id) ? sel.delete(p.id) : sel.add(p.id); d.classList.toggle('sel'); calc(); };
       d.dataset.pid = p.id;
       menu.appendChild(d);
@@ -67,7 +70,7 @@
     s.coupons.filter(c => c.onSale).forEach(c => {
       const d = document.createElement('div');
       d.className = 'coupon';
-      d.innerHTML = `<span>${c.name}</span><span class="exp">${desc(c)}</span>`;
+      d.innerHTML = `<span class="cname">${c.name}</span><span class="cright"><span class="exp">${desc(c)}</span><span class="ck">✓</span></span>`;
       d.onclick = () => { usedCoupons.has(c.id) ? usedCoupons.delete(c.id) : usedCoupons.add(c.id); d.classList.toggle('sel'); calc(); };
       d.dataset.cid = c.id;
       cp.appendChild(d);
